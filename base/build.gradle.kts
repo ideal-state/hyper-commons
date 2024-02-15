@@ -52,15 +52,15 @@ val manifestAttributes: MutableMap<String, *> = linkedMapOf(
         "Multi-Release" to true,
 )
 
-tasks.register<Jar>("sourceJar") {
+tasks.register<Jar>("sourcesJar") {
     archiveBaseName.set(projectName)
-    archiveClassifier.set("source")
+    archiveClassifier.set("sources")
     from(sourceSets.main.get().allSource)
     manifest {
         attributes(manifestAttributes)
     }
 }
-val sourceJar = tasks.named<Jar>("sourceJar")
+val sourcesJar = tasks.named<Jar>("sourcesJar")
 
 tasks.javadoc {
     options {
@@ -89,7 +89,7 @@ tasks.register<Jar>("javadocJar") {
 val javadocJar = tasks.named<Jar>("javadocJar")
 
 tasks.shadowJar {
-    dependsOn(sourceJar, javadocJar)
+    dependsOn(sourcesJar, javadocJar)
     archiveBaseName.set(projectName)
     archiveClassifier.set("")
     manifest {
@@ -104,7 +104,7 @@ tasks.jar {
 }
 
 tasks.create<Copy>("copyToRootBuildLibs") {
-    from(sourceJar, javadocJar, tasks.shadowJar)
+    from(sourcesJar, javadocJar, tasks.shadowJar)
     into("${rootProject.projectDir}/build/libs")
 }
 
@@ -127,6 +127,14 @@ publishing {
                     url.set("https://github.com/ideal-state")
                 }
 
+                developers {
+                    developer {
+                        id.set("ketikai")
+                        name.set("ketikai")
+                        email.set("ketikai@idealstate.team")
+                    }
+                }
+
                 licenses {
                     license {
                         name.set("Apache License 2.0")
@@ -142,7 +150,7 @@ publishing {
                 }
             }
 
-            artifact(sourceJar)
+            artifact(sourcesJar)
             artifact(javadocJar)
             artifact(tasks.shadowJar)
         }
