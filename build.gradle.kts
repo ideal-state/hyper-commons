@@ -9,7 +9,7 @@ val authors = properties["self.authors"] as String
 val javaVersion = (properties["self.java.version"] as String).toInt()
 val charset = properties["self.charset"] as String
 
-group = "team.idealstate.hyper.commons"
+group = "team.idealstate.hyper"
 version = majorVersion
 
 val excludes = setOf<String>()
