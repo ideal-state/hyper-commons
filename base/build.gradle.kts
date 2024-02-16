@@ -2,7 +2,6 @@ import org.apache.commons.lang3.time.DateFormatUtils
 import java.util.*
 
 plugins {
-    id("com.github.johnrengelman.shadow") version ("8.+")
     id("maven-publish")
     id("signing")
 }
@@ -88,23 +87,19 @@ tasks.register<Jar>("javadocJar") {
 }
 val javadocJar = tasks.named<Jar>("javadocJar")
 
-tasks.shadowJar {
+tasks.jar {
     dependsOn(sourcesJar, javadocJar)
     archiveBaseName.set(projectName)
     archiveClassifier.set("")
     manifest {
         attributes(manifestAttributes)
     }
-}
-
-tasks.jar {
-    dependsOn(tasks.shadowJar)
-    enabled = false
     finalizedBy("copyToRootBuildLibs")
 }
+val jar = tasks.named<Jar>("jar")
 
 tasks.create<Copy>("copyToRootBuildLibs") {
-    from(sourcesJar, javadocJar, tasks.shadowJar)
+    from(sourcesJar, javadocJar, jar)
     into("${rootProject.projectDir}/build/libs")
 }
 
@@ -152,7 +147,7 @@ publishing {
 
             artifact(sourcesJar)
             artifact(javadocJar)
-            artifact(tasks.shadowJar)
+            artifact(jar)
         }
     }
     repositories {
