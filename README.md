@@ -12,6 +12,30 @@
 
 > 提供一些基础的公共工具类
 
+### 在 Maven 项目中使用
+
+```xml
+<dependency>
+    <groupId>team.idealstate.hyper</groupId>
+    <artifactId>hyper-commons-base</artifactId>
+    <version>${version}</version>
+</dependency>
+```
+
+### 在 Gradle 项目中使用
+
+```groovy
+dependencies {
+    implementation "team.idealstate.hyper:hyper-commons-base:${version}"
+}
+```
+
+```kotlin
+dependencies {
+    implementation("team.idealstate.hyper:hyper-commons-base:${version}")
+}
+```
+
 ### 在哪下载 ?
 
 > 前往 [releases](https://github.com/ideal-state/hyper-commons/releases) 页
