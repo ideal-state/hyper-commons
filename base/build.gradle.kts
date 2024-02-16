@@ -1,3 +1,4 @@
+import groovy.util.Node
 import org.apache.commons.lang3.time.DateFormatUtils
 import java.util.*
 
@@ -13,10 +14,11 @@ val charset = project.ext["charset"] as String
 
 dependencies {
     compileOnly("org.jetbrains:annotations:24.0.0")
-    compileOnly(fileTree("${projectDir}/libraries"))
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+
+    testCompileOnly("org.jetbrains:annotations:24.0.0")
 }
 
 tasks.test {
@@ -34,6 +36,7 @@ java {
 
 tasks.compileJava {
     options.encoding = charset
+    finalizedBy(tasks.test)
 }
 
 tasks.processResources {
@@ -149,6 +152,36 @@ publishing {
                     tag.set(version)
                     connection.set("scm:git:git@github.com:ideal-state/hyper-commons.git")
                     developerConnection.set("scm:git:git@github.com:ideal-state/hyper-commons.git")
+                }
+
+                withXml {
+                    var dependenciesNode: Node? = null
+                    val compileDependencyIds = mutableSetOf<String>()
+                    configurations.compileClasspath.get()
+                            .resolvedConfiguration.firstLevelModuleDependencies.forEach { dependency ->
+                                if (dependenciesNode == null) {
+                                    dependenciesNode = asNode().appendNode("dependencies")
+                                }
+                                val dependencyNode = dependenciesNode!!.appendNode("dependency")
+                                dependencyNode.appendNode("groupId", dependency.moduleGroup)
+                                dependencyNode.appendNode("artifactId", dependency.moduleName)
+                                dependencyNode.appendNode("version", dependency.moduleVersion)
+                                dependencyNode.appendNode("scope", "compile")
+                                compileDependencyIds.add("${dependency.moduleGroup}:${dependency.moduleName}:${dependency.moduleVersion}")
+                            }
+                    configurations.runtimeClasspath.get()
+                            .resolvedConfiguration.firstLevelModuleDependencies.forEach { dependency ->
+                                if (!compileDependencyIds.contains("${dependency.moduleGroup}:${dependency.moduleName}:${dependency.moduleVersion}")) {
+                                    if (dependenciesNode == null) {
+                                        dependenciesNode = asNode().appendNode("dependencies")
+                                    }
+                                    val dependencyNode = dependenciesNode!!.appendNode("dependency")
+                                    dependencyNode.appendNode("groupId", dependency.moduleGroup)
+                                    dependencyNode.appendNode("artifactId", dependency.moduleName)
+                                    dependencyNode.appendNode("version", dependency.moduleVersion)
+                                    dependencyNode.appendNode("scope", "runtime")
+                                }
+                            }
                 }
             }
 
